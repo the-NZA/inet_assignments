@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calendar</title>
+
+  <style>
+    .today {
+      background-color: lightblue;
+      border-radius: 50%;
+    }
+  </style>
+</head>
+
+<body>
+  <div>
+    <button id="btnPrev" type="button">назад</button>
+    <button id="btnNext" type="button">вперед</button>
+    <div id="divCal"></div>
+  </div>
+
+  <script>
+    class Calendarer {
+      DaysOfWeek = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+      Months = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+
+      curData = new Date();
+      currMonth = this.curData.getMonth('9');
+      currYear = this.curData.getFullYear('22');
+      currDay = this.curData.getDate('3');
+
+      constructor(divID) {
+        this.divID = divID;
+      }
+
+      nextMonth() {
+        if (this.currMonth == 11) {
+          this.currMonth = 0;
+          this.currYear = this.currYear + 1;
+        }
+        else {
+          this.currMonth = this.currMonth + 1;
+        }
+        this.showcurr();
+      };
+
+      previousMonth() {
+        if (this.currMonth == 0) {
+          this.currMonth = 11;
+          this.currYear = this.currYear - 1;
+        }
+        else {
+          this.currMonth = this.currMonth - 1;
+        }
+        this.showcurr();
+      };
+
+      showcurr() {
+        this.showMonth(this.currYear, this.currMonth);
+      };
+
+      showMonth(y, m) {
+        let d = new Date(),
+          firstDayOfMonth = new Date(y, m, 7).getDay(),
+          lastDateOfMonth = new Date(y, m + 1, 0).getDate(),
+          lastDayOfLastMonth = m == 0 ? new Date(y - 1, 11, 0).getDate() : new Date(y, m, 0).getDate();
+
+        let html = '<table>';
+        html += '<thead><tr>';
+        html += '<td colspan="7">' + this.Months[m] + ' ' + y + '</td>';
+        html += '</tr></thead>';
+
+        html += '<tr class="days">';
+        for (var i = 0; i < this.DaysOfWeek.length; i++) {
+          html += '<td>' + this.DaysOfWeek[i] + '</td>';
+        }
+        html += '</tr>';
+
+        i = 1;
+        do {
+          var dow = new Date(y, m, i).getDay();
+          if (dow == 1) {
+            html += '<tr>';
+          } else if (i == 1) {
+            html += '<tr>';
+            let k = lastDayOfLastMonth - firstDayOfMonth + 1;
+
+            for (var j = 0; j < firstDayOfMonth; j++) {
+              html += '<td class="not-current">' + k + '</td>';
+              k++;
+            }
+          }
+
+          let tmpData = new Date();
+          var tmpYear = tmpData.getFullYear();
+          var tmpMonth = tmpData.getMonth();
+          if (tmpYear == this.currYear && tmpMonth == this.currMonth && i == this.currDay) {
+            html += '<td class="today">' + i + '</td>';
+          } else {
+            html += '<td class="normal">' + i + '</td>';
+          }
+
+          if (dow == 0) {
+            html += '</tr>';
+          } else if (i == lastDateOfMonth) {
+            var k = 1;
+            for (dow; dow < 7; dow++) {
+              html += '<td class="not-current">' + k + '</td>';
+              k++;
+            }
+          }
+
+          i++;
+        } while (i <= lastDateOfMonth);
+        html += '</table>';
+        document.getElementById(this.divID).innerHTML = html;
+      };
+    }
+    const c = new Calendarer("divCal");
+    c.showcurr();
+    console.log(c);
+
+    // Привязываем кнопки «Следующий» и «Предыдущий»
+    document.getElementById('btnNext').addEventListener('click', function () {
+      c.nextMonth();
+    })
+
+    document.getElementById('btnPrev').addEventListener('click', function () {
+      c.previousMonth();
+    });
+
+  </script>
+</body>
+
+</html>
