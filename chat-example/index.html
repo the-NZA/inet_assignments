@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Socket.IO chat</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding-bottom: 3rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    #form {
+      background: rgba(0, 0, 0, 0.15);
+      padding: 0.25rem;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      height: 3rem;
+      box-sizing: border-box;
+      backdrop-filter: blur(10px);
+    }
+
+    #input {
+      border: none;
+      padding: 0 1rem;
+      flex-grow: 1;
+      border-radius: 2rem;
+      margin: 0.25rem;
+    }
+
+    #input:focus {
+      outline: none;
+    }
+
+    #form>button {
+      background: #333;
+      border: none;
+      padding: 0 1rem;
+      margin: 0.25rem;
+      border-radius: 3px;
+      outline: none;
+      color: #fff;
+    }
+
+    #messages {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    #messages>li {
+      padding: 0.5rem 1rem;
+    }
+
+    #messages>li:nth-child(odd) {
+      background: #efefef;
+    }
+
+    .name_dialog {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 9;
+
+      width: 100vw;
+      height: 100vh;
+
+      margin: 0;
+      padding: 0;
+      background-color: lightblue;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .name_dialog__form {
+      background-color: lightcyan;
+      padding: 2rem;
+      min-width: 20rem;
+    }
+
+    .name_dialog__form label {
+      font-weight: bold;
+      text-align: center;
+      display: block;
+    }
+
+    .name_dialog__form input {
+      width: 100%;
+      padding: 0.5rem;
+    }
+
+    .name_dialog__form button {
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      border-radius: 0.3rem;
+      background-color: cyan;
+      width: 100%;
+      padding: 0.5rem;
+    }
+  </style>
+</head>
+
+<body>
+  <dialog class="name_dialog" open>
+    <form class="name_dialog__form">
+      <label for="name_input">What is your name?</label>
+      <br>
+      <input type="text" id="name_input" placeholder="Name">
+      <hr>
+      <button id="name_submit">Submit</button>
+    </form>
+  </dialog>
+
+
+  <ul id="messages"></ul>
+  <form id="form" action="">
+    <input id="input" autocomplete="off" /><button>Send</button>
+  </form>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script>
+    const socket = io();
+
+    let messages = document.getElementById('messages');
+    const form = document.getElementById('form');
+    const input = document.getElementById('input');
+
+    const nameDialog = document.querySelector('.name_dialog');
+    const nameButton = nameDialog.querySelector('#name_submit');
+    const nameInput = nameDialog.querySelector('#name_input');
+
+    nameButton.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      fetch('/reg', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: nameInput.value,
+          id: socket.id,
+        })
+      })
+        .then(res => res.json())
+        .then(data => {
+          if(data.success) {
+            nameDialog.close();
+            nameDialog.style.display = 'none';
+          } else {
+            alert('Name already taken');
+          }
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    });
+
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      if (input.value) {
+        socket.emit('chat message', input.value);
+        input.value = '';
+      }
+    });
+
+    socket.on('chat message', function (msg) {
+      var item = document.createElement('li');
+      item.textContent = msg;
+      messages.appendChild(item);
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+  </script>
+</body>
+
+</html>
