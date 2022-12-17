@@ -1,9 +1,10 @@
-const express = require("express");
+import express from "express";
+import bodyParser from "body-parser";
+import cors from "cors";
+import db from "./models/index.js"
+
 const app = express();
-const bodyParser = require("body-parser");
 const PORT = process.env.PORT || 3000;
-const db = require("./models/");
-const cors = require("cors");
 
 app.use(cors());
 app.use(bodyParser.json());

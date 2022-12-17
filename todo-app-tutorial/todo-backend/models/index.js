@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
+import {todoModel} from "./todo.js"
 
 mongoose.connect('mongodb://localhost:27017/todo-app',{
     keepAlive: true,
@@ -9,4 +10,6 @@ mongoose.connect('mongodb://localhost:27017/todo-app',{
 mongoose.set('debug', true);
 mongoose.Promise = Promise;
 
-module.exports.Todo = require("./todo");
+export default {
+    Todo: todoModel
+}
